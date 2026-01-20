@@ -1,0 +1,9 @@
+{
+  "name": "KisaanMate - Beginner Farming Assistant",
+  "description": "An AI-powered guide for first-time farmers in India, focusing on organic practices, risk management, and step-by-step planning.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
