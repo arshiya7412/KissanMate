@@ -124,6 +124,11 @@ src/
 
 ---
 
+## Deployement Link
+
+ Open [https://kissanmate.netlify.app/](https://kissanmate.netlify.app/) to view it in the browser.
+
+
 ## 🤝 Contributing
 
 Contributions are welcome!
