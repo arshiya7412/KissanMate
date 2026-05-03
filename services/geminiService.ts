@@ -1,8 +1,4 @@
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { UserProfile, ChatMessage, SoilType, MoistureLevel } from "../types";
-
-// Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const getSystemInstruction = (profile: UserProfile): string => {
   return `
@@ -25,6 +21,21 @@ Your Core Rules:
 
 If the user uploads an image of soil, say "Based on visual cues..."
 `;
+};
+
+const proxyGenerateContent = async (model: string, contents: any, config?: any): Promise<string> => {
+  const response = await fetch("/api/gemini", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model, contents, config }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch from backend AI service");
+  }
+
+  const data = await response.json();
+  return data.text;
 };
 
 export const sendMessageToGemini = async (
@@ -51,16 +62,10 @@ export const sendMessageToGemini = async (
       contents = { parts: [{ text: message }] };
     }
 
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: modelName,
-      contents: contents,
-      config: {
-        systemInstruction: systemInstruction,
-        temperature: 0.7,
-      }
-    });
-
-    return response.text || "Connection error. Please try again.";
+    return await proxyGenerateContent(modelName, contents, {
+      systemInstruction: systemInstruction,
+      temperature: 0.7,
+    }) || "Connection error. Please try again.";
 
   } catch (error) {
     console.error("Gemini API Error:", error);
@@ -72,15 +77,9 @@ export const generatePlanAnalysis = async (userProfile: UserProfile): Promise<st
   try {
     const prompt = `Create a brief summary for my farming plan. Suggest 2 best beginner crops and 1 major risk. Reply in ${userProfile.language}.`;
     
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: { parts: [{ text: prompt }] },
-      config: {
-        systemInstruction: getSystemInstruction(userProfile)
-      }
-    });
-    
-    return response.text || "Could not generate plan.";
+    return await proxyGenerateContent('gemini-3-flash-preview', { parts: [{ text: prompt }] }, {
+      systemInstruction: getSystemInstruction(userProfile)
+    }) || "Could not generate plan.";
   } catch (e) {
     return "Plan generation unavailable.";
   }
@@ -105,12 +104,9 @@ export const getCropRecommendations = async (
 export const getDashboardInsights = async (userProfile: UserProfile): Promise<string> => {
   const prompt = `Give me 1 short, actionable farming tip based on ${userProfile.location} weather. Max 20 words. Reply in ${userProfile.language}.`;
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: { parts: [{ text: prompt }] },
-      config: { systemInstruction: getSystemInstruction(userProfile) }
-    });
-    return response.text || "Check soil moisture daily.";
+    return await proxyGenerateContent('gemini-3-flash-preview', { parts: [{ text: prompt }] }, {
+      systemInstruction: getSystemInstruction(userProfile)
+    }) || "Check soil moisture daily.";
   } catch (e) {
     return "Keep your farm clean.";
   }

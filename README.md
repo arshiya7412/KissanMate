@@ -1,4 +1,4 @@
- ## 🌾 KisaanMate: AI-Powered Farming Assistant
+# 🌾 KisaanMate: AI-Powered Farming Assistant
 
 ![React](https://img.shields.io/badge/React-19-blue?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)
@@ -142,4 +142,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 Made with ❤️ for Indian Farmers.
-
